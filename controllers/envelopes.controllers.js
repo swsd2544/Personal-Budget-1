@@ -1,4 +1,4 @@
-const envelopes = require('../../envelopes');
+const envelopes = require('../envelopes');
 
 let id = 6;
 
@@ -7,13 +7,7 @@ const getAllEnvelopes = (req, res) => {
 };
 
 const getEnvelope = (req, res) => {
-	const id = req.params.id;
-	const envelope = envelopes.find((evl) => evl.id === parseInt(id));
-	if (envelope) {
-		res.json(envelope);
-	} else {
-		res.status(404).json({ msg: `Not found the envelope with id ${id}.` });
-	}
+	res.json(envelopes[req.envelopeIndex]);
 };
 
 const createEnvelope = (req, res) => {
@@ -30,50 +24,36 @@ const createEnvelope = (req, res) => {
 };
 
 const changeEnvelope = (req, res) => {
-	const id = req.params.id;
 	const { name, budget } = req.body;
-	const envelopeIndex = envelopes.findIndex((evl) => evl.id === parseInt(id));
-	if (envelopeIndex === -1) {
-		res.status(404).json({ msg: `Not found the envelope with id ${id}.` });
-	} else if (!(name && budget)) {
+	if (!(name && budget)) {
 		res.status(400).json({
 			msg: `Not enough information. Please include both name and budget.`,
 		});
 	} else {
-		envelopes[envelopeIndex].name = name;
-		envelopes[envelopeIndex].budget = budget;
+		envelopes[req.envelopeIndex].name = name;
+		envelopes[req.envelopeIndex].budget = budget;
 		res.json(envelopes);
 	}
 };
 
 const deleteAllEnvelopes = (req, res) => {
 	envelopes.length = 0;
-	// res.sendStatus(204);
+	res.sendStatus(204);
 };
 
 const deleteEnvelope = (req, res) => {
-	const id = req.params.id;
-	const envelopeIndex = envelopes.findIndex((evl) => evl.id === parseInt(id));
-	if (envelopeIndex === -1) {
-		res.status(404).json({ msg: `Not found the envelope with id ${id}.` });
-	} else {
-		envelopes.splice(envelopeIndex, 1);
-		res.json(envelopes);
-	}
+	envelopes.splice(req.envelopeIndex, 1);
+	res.json(envelopes);
 };
 
 const transferMoney = (req, res) => {
-	const id = req.params.id;
 	const { target, amount } = req.body;
-	const envelopeIndex = envelopes.findIndex((evl) => evl.id === parseInt(id));
 	const targetIndex = envelopes.findIndex((evl) => evl.id === parseInt(target));
-	if (envelopeIndex === -1) {
-		res.status(404).json({ msg: `Not found the envelope with id '${id}'.` });
-	} else if (targetIndex === -1) {
+	if (targetIndex === -1) {
 		res
 			.status(404)
 			.json({ msg: `Not found the envelope with id '${target}'.` });
-	} else if (envelopeIndex === targetIndex) {
+	} else if (req.envelopeIndex === targetIndex) {
 		res.status(400).json({
 			msg: `Sorry. You can't transfer money to the same account.`,
 		});
@@ -81,14 +61,14 @@ const transferMoney = (req, res) => {
 		res.status(400).json({
 			msg: `Not enough information. Please include both name and budget.`,
 		});
-	} else if (envelopes[envelopeIndex].budget < amount) {
+	} else if (envelopes[req.envelopeIndex].budget < amount) {
 		res.status(400).json({
 			msg: `Not enough budget. Please try again after replenish the envelope's budget.`,
 		});
 	} else {
-		envelopes[envelopeIndex].budget -= amount;
+		envelopes[req.envelopeIndex].budget -= amount;
 		envelopes[targetIndex].budget += amount;
-		res.json([envelopes[envelopeIndex], envelopes[targetIndex]]);
+		res.json([envelopes[req.envelopeIndex], envelopes[targetIndex]]);
 	}
 };
 

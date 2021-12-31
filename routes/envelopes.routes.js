@@ -1,6 +1,10 @@
 const express = require('express');
-const envelopesController = require('../../controllers/api/envelopes.controllers');
+const envelopesController = require('../controllers/envelopes.controllers');
+const envelopeIdMiddleware = require('../middlewares/envelopeId.middleware');
 const router = express.Router();
+
+// Envelope Id Middleware
+router.use('/:id', envelopeIdMiddleware);
 
 // Return all envelopes
 router.get('/', envelopesController.getAllEnvelopes);
