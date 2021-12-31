@@ -1,8 +1,11 @@
 const express = require('express');
+const envelopes = require('./routes/api/envelopes');
 
 const app = express();
 
-app.get('/', (req, res) => res.send('Hello, World!'));
+app.use(express.json());
+
+app.use('/api/envelopes', envelopes);
 
 const PORT = process.env.PORT || 5000;
 
